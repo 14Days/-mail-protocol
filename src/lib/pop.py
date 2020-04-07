@@ -300,10 +300,7 @@ if HAVE_SSL:
             return sock
 
         def stls(self, keyfile=None, certfile=None, context=None):
-            """The method unconditionally raises an exception since the
-            STLS command doesn't make any sense on an already established
-            SSL/TLS session.
-            """
+            # SSL 模式下不能再次建立 SSL 连接
             raise ErrorProto('-ERR TLS session already established')
 
 
