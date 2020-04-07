@@ -251,7 +251,7 @@ class POP3:
             raise ErrorProto('-ERR CAPA not supported by server')
         return caps
 
-    # 激活一个 TLS 回话
+    # 激活一个 TLS 会话
     def stls(self, context=None):
         if not HAVE_SSL:
             raise ErrorProto('-ERR TLS support missing')
