@@ -53,7 +53,7 @@ class POP3:
 
     # 发送一行消息
     def _put_line(self, line):
-        if self._debugging > 1:
+        if self._debugging > 0:
             print('*put*', repr(line))
         self.sock.sendall(line + CRLF)
 
@@ -70,7 +70,7 @@ class POP3:
         if len(line) > _MAX_LINE:
             raise ErrorProto('line too long')
 
-        if self._debugging > 1:
+        if self._debugging > 0:
             print('*get*', repr(line))
         # 表示断开连接
         if not line:
@@ -89,7 +89,7 @@ class POP3:
     # 从服务器得到响应
     def _get_resp(self):
         resp, o = self._get_line()
-        if self._debugging > 1:
+        if self._debugging > 0:
             print('*resp*', repr(resp))
         # 当响应不是以 + 开始时抛出错误
         if not resp.startswith(b'+'):
