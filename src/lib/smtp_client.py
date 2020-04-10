@@ -819,6 +819,6 @@ if __name__ == '__main__':
 
     server = SMTP('smtp.163.com')
     server.set_debuglevel(1)
-    server.login('w1637894214@163.com', 'wjq4214')
+    server.login('w1637894214@163.com', 'xxx')
     server.sendmail(fromaddr, toaddrs, message.as_string())
     server.quit()
