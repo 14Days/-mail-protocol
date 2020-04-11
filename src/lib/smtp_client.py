@@ -287,7 +287,8 @@ class SMTP:
                 line = self.file.readline(_MAX_LINE + 1)
             except OSError as e:
                 self.close()
-                raise SMTPServerDisconnected(f'Connection unexpectedly closed: {e}')
+                raise SMTPServerDisconnected(
+                    f'Connection unexpectedly closed: {e}')
             if not line:
                 self.close()
                 raise SMTPServerDisconnected('Connection unexpectedly closed')
@@ -354,7 +355,7 @@ class SMTP:
             if auth_match:
                 # 这不会删除重复项, 但这没问题
                 self.esmtp_features['auth'] = self.esmtp_features.get('auth', "") \
-                                              + ' ' + auth_match.groups(0)[0]
+                    + ' ' + auth_match.groups(0)[0]
                 continue
 
             # RFC 1869 要求在 ehlo 关键字和参数之间需要一个空格
@@ -366,7 +367,7 @@ class SMTP:
                 params = m.string[m.end('feature'):].strip()
                 if feature == 'auth':
                     self.esmtp_features[feature] = self.esmtp_features.get(feature, "") \
-                                                   + ' ' + params
+                        + ' ' + params
                 else:
                     self.esmtp_features[feature] = params
         return code, msg
@@ -411,7 +412,8 @@ class SMTP:
                 if self.has_extn('smtputf8'):
                     self.command_encoding = 'utf-8'
                 else:
-                    raise SMTPNotSupportedError('SMTPUTF8 not supported by server')
+                    raise SMTPNotSupportedError(
+                        'SMTPUTF8 not supported by server')
             option_list = ' ' + ' '.join(options)
         self.putcmd('mail', f'FROM:{quoteaddr(sender)}{option_list}')
         return self.getreply()
@@ -529,7 +531,8 @@ class SMTP:
 
         self.ehlo_or_helo_if_needed()
         if not self.has_extn('auth'):
-            raise SMTPNotSupportedError('SMTP AUTH extension not supported by server.')
+            raise SMTPNotSupportedError(
+                'SMTP AUTH extension not supported by server.')
 
         # 服务器声明支持 Auth
         advertised_authlist = self.esmtp_features['auth'].split()
@@ -572,9 +575,11 @@ class SMTP:
             if not _have_ssl:
                 raise RuntimeError('No SSL support included in this Python')
             if context is not None and keyfile is not None:
-                raise ValueError('context and keyfile arguments are mutually exclusive')
+                raise ValueError(
+                    'context and keyfile arguments are mutually exclusive')
             if context is not None and certfile is not None:
-                raise ValueError('context and certfile arguments are mutually exclusive')
+                raise ValueError(
+                    'context and certfile arguments are mutually exclusive')
             if keyfile is not None or certfile is not None:
                 import warnings
                 warnings.warn('keyfile and certfile are deprecated, use a '
@@ -660,7 +665,8 @@ class SMTP:
         elif len(resent) == 1:
             header_prefix = 'Resent-'
         else:
-            raise ValueError('message has more than one "Resent - " header block')
+            raise ValueError(
+                'message has more than one "Resent - " header block')
         if from_addr is None:
             # Prefer the sender field per RFC 2822:3.6.2.
             from_addr = (msg[header_prefix + 'Sender']
@@ -761,7 +767,6 @@ if _have_ssl:
                                                   server_hostname=self._host)
             return new_socket
 
-
     __all__.append('SMTP_SSL')
 
 #
@@ -801,24 +806,16 @@ class LMTP(SMTP):
         (code, msg) = self.getreply()
         if self.debuglevel > 0:
             self._print_debug('connect:', msg)
-        return (code, msg)
+        return code, msg
 
 
-# Test the sendmail method, which tests most of the others.
-# Note: This always sends to localhost.
 if __name__ == '__main__':
-    def prompt(prompt):
-        sys.stdout.write(prompt + ': ')
-        sys.stdout.flush()
-        return sys.stdin.readline().strip()
-
-
-    fromaddr = prompt('From')
-    toaddrs = prompt('To').split(',')
+    fromaddr = 'from@runoob.com'
+    toaddrs = ['w1637894214@163.com']
     message = MIMEText('Python 邮件发送测试...', 'plain', 'utf-8')
 
-    server = SMTP('smtp.163.com')
+    server = SMTP('localhost')
     server.set_debuglevel(1)
-    server.login('w1637894214@163.com', 'xxx')
+    # server.login('w1637894214@163.com', 'xxx')
     server.sendmail(fromaddr, toaddrs, message.as_string())
     server.quit()
