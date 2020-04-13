@@ -355,7 +355,7 @@ class SMTP:
             if auth_match:
                 # 这不会删除重复项, 但这没问题
                 self.esmtp_features['auth'] = self.esmtp_features.get('auth', "") \
-                    + ' ' + auth_match.groups(0)[0]
+                                              + ' ' + auth_match.groups(0)[0]
                 continue
 
             # RFC 1869 要求在 ehlo 关键字和参数之间需要一个空格
@@ -367,7 +367,7 @@ class SMTP:
                 params = m.string[m.end('feature'):].strip()
                 if feature == 'auth':
                     self.esmtp_features[feature] = self.esmtp_features.get(feature, "") \
-                        + ' ' + params
+                                                   + ' ' + params
                 else:
                     self.esmtp_features[feature] = params
         return code, msg
@@ -767,6 +767,7 @@ if _have_ssl:
                                                   server_hostname=self._host)
             return new_socket
 
+
     __all__.append('SMTP_SSL')
 
 #
@@ -814,8 +815,7 @@ if __name__ == '__main__':
     toaddrs = ['w1637894214@163.com']
     message = MIMEText('Python 邮件发送测试...', 'plain', 'utf-8')
 
-    server = SMTP('localhost')
+    server = SMTP('localhost', 8025)
     server.set_debuglevel(1)
-    # server.login('w1637894214@163.com', 'xxx')
     server.sendmail(fromaddr, toaddrs, message.as_string())
     server.quit()
