@@ -29,7 +29,7 @@ CR = b'\r'
 LF = b'\n'
 CRLF = CR + LF
 
-# 定义调用 readline() 时可以读取的最大的行数
+# 定义调用 readline() 时可以读取的最大的字符数
 # 这是为了防止读取任意的行数
 # RFC 1939 中限制 POP3 一行最多包含 512 个字符, 包括 CRLF
 # 我们选择 2048 作为一个安全的取值
@@ -276,15 +276,13 @@ if HAVE_SSL:
         def __init__(self, host, port=POP3_SSL_PORT, keyfile=None, certfile=None,
                      timeout=socket._GLOBAL_DEFAULT_TIMEOUT, context=None):
             if context is not None and keyfile is not None:
-                raise ValueError("context and keyfile arguments are mutually "
-                                 "exclusive")
+                raise ValueError("context and keyfile arguments are mutually exclusive")
             if context is not None and certfile is not None:
-                raise ValueError("context and certfile arguments are mutually "
-                                 "exclusive")
+                raise ValueError("context and certfile arguments are mutually exclusive")
             if keyfile is not None or certfile is not None:
                 import warnings
-                warnings.warn("keyfile and certfile are deprecated, use a "
-                              "custom context instead", DeprecationWarning, 2)
+                warnings.warn("keyfile and certfile are deprecated, use a custom context instead", DeprecationWarning,
+                              2)
             self.keyfile = keyfile
             self.certfile = certfile
             if context is None:
