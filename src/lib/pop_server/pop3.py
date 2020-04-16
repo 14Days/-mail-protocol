@@ -24,6 +24,7 @@ class Session:
         self.peer = None
         self.status = 0
         self.username = None
+        self.del_list = []
         self.loop = loop
 
 
@@ -196,8 +197,10 @@ class POP3(asyncio.StreamReaderProtocol):
     async def pop3_USER(self, username):
         if not username:
             await self.push('-ERR Syntax: username')
+            return
         if self.session.status != 0:
             await self.push('-ERR Syntax: error command')
+            return
         self.session.username = username
         status = await self._call_handler_hook('USER', username)
         if status is MISSING:
@@ -207,10 +210,13 @@ class POP3(asyncio.StreamReaderProtocol):
     async def pop3_PASS(self, password):
         if not password:
             await self.push('-ERR Syntax: password')
+            return
         if self.session.status != 0:
             await self.push('-ERR Syntax: error command')
+            return
         if self.session.username is None:
             await self.push('-ERR Please send username first')
+            return
         status = await self._call_handler_hook('PASS', password)
         if status is MISSING:
             self.session.status = 1
@@ -223,7 +229,108 @@ class POP3(asyncio.StreamReaderProtocol):
     async def pop3_STAT(self):
         if self.session.status != 1:
             await self.push('-ERR Please auth')
+            return
         status = await self._call_handler_hook('STAT')
         if status is MISSING:
             status = f'+OK 0 1000'
         await self.push(status)
+
+    async def pop3_UIDL(self, which):
+        if self.session.status != 1:
+            await self.push('-ERR Please auth')
+            return
+        status = await self._call_handler_hook('UIDL', which)
+        if status is MISSING:
+            status = f'-ERR UIDL not implemented'
+            await self.push(status)
+            raise NotImplementedError('UIDL')
+        await self.push(status)
+
+    async def pop3_LIST(self, which):
+        if self.session.status != 1:
+            await self.push('-ERR Please auth')
+            return
+        status = await self._call_handler_hook('LIST', which)
+        if status is MISSING:
+            status = f'-ERR LIST not implemented'
+            await self.push(status)
+            raise NotImplementedError('LIST')
+        await self.push(status)
+
+    async def pop3_RETR(self, which):
+        if self.session.status != 1:
+            await self.push('-ERR Please auth')
+            return
+        if which is None:
+            await self.push('-ERR Must send No.')
+            return
+        try:
+            which = int(which)
+        except ValueError:
+            await self.push('-ERR args error')
+            return
+        status = await self._call_handler_hook('RETR', which)
+        if status is MISSING:
+            status = f'-ERR RETR not implemented'
+            await self.push(status)
+            raise NotImplementedError('RETR')
+        await self.push(status)
+
+    async def pop3_DELE(self, which):
+        if self.session.status != 1:
+            await self.push('-ERR Please auth')
+            return
+        if which is None:
+            await self.push('-ERR Must send No.')
+            return
+        try:
+            which = int(which)
+        except ValueError:
+            await self.push('-ERR args error')
+            return
+        self.session.del_list.append(which)
+        await self.push('+OK core mail')
+
+    async def pop3_RSET(self):
+        if self.session.status != 1:
+            await self.push('-ERR Please auth')
+            return
+
+        self.session.del_list.clear()
+        await self.push('+OK core mail')
+
+    async def pop3_TOP(self, arg):
+        if self.session.status != 1:
+            await self.push('-ERR Please auth')
+            return
+        if arg:
+            which, num = arg.split(' ')
+            try:
+                which, num = int(which), int(num)
+            except ValueError:
+                await self.push('-ERR args error')
+                return
+            status = await self._call_handler_hook('TOP', which, num)
+            if status is MISSING:
+                status = f'-ERR TOP not implemented'
+                await self.push(status)
+                raise NotImplementedError('TOP')
+            await self.push(status)
+        else:
+            await self.push('-ERR Must send mail ID and line number')
+
+    async def pop3_NOOP(self):
+        await self.push('+OK core mail')
+
+    async def pop3_QUIT(self, arg):
+        if arg:
+            await self.push('501 Syntax: QUIT')
+        else:
+            status = await self._call_handler_hook('QUIT')
+            if status is MISSING:
+                status = f'-ERR QUIT not implemented'
+                await self.push(status)
+                raise NotImplementedError('QUIT')
+            await self.push('+OK core mail')
+            self._handler_coroutine.cancel()
+            self.transport.close()
