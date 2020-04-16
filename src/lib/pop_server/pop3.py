@@ -41,7 +41,6 @@ class POP3(asyncio.StreamReaderProtocol):
                  *,
                  hostname=None,
                  ident=None,
-                 tls_context=None,
                  timeout=300,
                  loop=None):
         self.__ident__ = ident or __ident__
@@ -56,9 +55,45 @@ class POP3(asyncio.StreamReaderProtocol):
             self.hostname = hostname
         else:
             self.hostname = socket.getfqdn()
-        self.tls_context = tls_context
+        self._timeout_duration = timeout
+        self._timeout_handle = None
+        self._tls_handshake_okay = True
+        self._tls_protocol = None
+        self._original_transport = None
+        self.session = None
+        self.transport = None
+        self._handler_coroutine = None
 
     def _client_connected_cb(self, reader, writer):
         """其实就是将 client_connected_cb 函数包装了一下不是必要的"""
         self._reader = reader
         self._writer = writer
+
+    def _create_session(self):
+        return Session(self.loop)
+
+    async def _call_handler_hook(self, command, *args):
+        """调用传入的 handler"""
+        hook = getattr(self.event_handler, 'handle_' + command, None)
+        if hook is None:
+            return MISSING
+        status = await hook(self, self.session, *args)
+        return status
+
+    def _timeout_cb(self):
+        log.info(f'{self.session.peer} connection timeout')
+
+        # 对 transport 调用 close() 将触发 connection_lost()
+        # 这将在需要时正常关闭 SSL 传输并清除状态。
+        self.transport.close()
+
+    def _reset_timeout(self):
+        if self._timeout_handle is not None:
+            self._timeout_handle.cancel()
+
+        self._timeout_handle = self.loop.call_later(self._timeout_duration, self._timeout_cb)
+
+    def connection_made(self, transport: asyncio.transports.BaseTransport) -> None:
+        self.session = self._create_session()
+        self.session.peer = transport.get_extra_info('peername')
+        self._reset_timeout()
