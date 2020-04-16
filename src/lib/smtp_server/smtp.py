@@ -198,7 +198,7 @@ class SMTP(asyncio.StreamReaderProtocol):
                 if len(line) > max_sz:
                     await self.push('500 Error: line too long')
                     continue
-                # 检查使用使用 TLS
+                # 检查是否使用 TLS
                 if not self._tls_handshake_okay and command != 'QUIT':
                     await self.push('554 Command refused due to lack of security')
                     continue
@@ -214,7 +214,7 @@ class SMTP(asyncio.StreamReaderProtocol):
                     await self.push(f'500 Error: command "{command}" not recognized')
                     continue
 
-                # 收到非法命令, 重置 timer
+                # 收到命令, 重置 timer
                 self._reset_timeout()
                 # 执行对应的方法
                 await method(arg)
