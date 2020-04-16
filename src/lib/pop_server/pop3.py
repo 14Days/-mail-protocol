@@ -22,8 +22,8 @@ MISSING = object()
 class Session:
     def __init__(self, loop):
         self.peer = None
-        self.ssl = None
-        self.host_name = None
+        self.status = 0
+        self.username = None
         self.loop = loop
 
 
@@ -185,3 +185,45 @@ class POP3(asyncio.StreamReaderProtocol):
         # 取消正在执行的异步方法
         self._handler_coroutine.cancel()
         self.transport = None
+
+    def eof_received(self) -> bool:
+        """收到文件尾执行的操作"""
+        log.info('%r EOF received', self.session.peer)
+        # 取消正在执行的异步方法
+        self._handler_coroutine.cancel()
+        return super().eof_received()
+
+    async def pop3_USER(self, username):
+        if not username:
+            await self.push('-ERR Syntax: username')
+        if self.session.status != 0:
+            await self.push('-ERR Syntax: error command')
+        self.session.username = username
+        status = await self._call_handler_hook('USER', username)
+        if status is MISSING:
+            status = f'+OK ({self.hostname}): {username}'
+        await self.push(status)
+
+    async def pop3_PASS(self, password):
+        if not password:
+            await self.push('-ERR Syntax: password')
+        if self.session.status != 0:
+            await self.push('-ERR Syntax: error command')
+        if self.session.username is None:
+            await self.push('-ERR Please send username first')
+        status = await self._call_handler_hook('PASS', password)
+        if status is MISSING:
+            self.session.status = 1
+            status = f'+OK welcome {self.session.username}'
+        await self.push(status)
+
+    async def pop3_APOP(self, *args):
+        await self.push('-ERR APOP not implemented')
+
+    async def pop3_STAT(self):
+        if self.session.status != 1:
+            await self.push('-ERR Please auth')
+        status = await self._call_handler_hook('STAT')
+        if status is MISSING:
+            status = f'+OK 0 1000'
+        await self.push(status)
