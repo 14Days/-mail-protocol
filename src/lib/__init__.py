@@ -40,13 +40,3 @@ class SaveMail:
 async def amain(loop):
     cont = Controller(SaveMail(), hostname='::0', port=8025)
     cont.start()
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    loop = asyncio.get_event_loop()
-    loop.create_task(amain(loop=loop))
-    try:
-        loop.run_forever()
-    except KeyboardInterrupt:
-        pass
