@@ -566,8 +566,7 @@ class SMTP(asyncio.StreamReaderProtocol):
             return
         # XXX currently there are no options we recognize.
         if len(params) > 0:
-            await self.push(
-                '555 RCPT TO parameters not recognized or not implemented')
+            await self.push('555 RCPT TO parameters not recognized or not implemented')
             return
         status = await self._call_handler_hook('RCPT', address, rcpt_options)
         if status is MISSING:

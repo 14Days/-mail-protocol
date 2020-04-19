@@ -11,3 +11,6 @@ log/flask.log.*
 
 # 缓存文件
 __pycache__
+
+# mail 文件
+mail/**/*
