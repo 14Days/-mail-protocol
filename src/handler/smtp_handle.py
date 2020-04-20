@@ -33,5 +33,5 @@ class SaveMail:
         return '250 OK'
 
     def _save(self, mail_from, rcpt_tos, data):
-        box = mailbox.Maildir(pathlib.Path.joinpath(self.path, rcpt_tos), create=True)
+        box = mailbox.Maildir(self.path, create=True)
         box.add(data)

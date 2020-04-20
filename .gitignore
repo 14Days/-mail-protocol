@@ -13,4 +13,4 @@ log/flask.log.*
 __pycache__
 
 # mail 文件
-mail/**/*
+mail/**/*.local
