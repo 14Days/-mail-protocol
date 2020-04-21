@@ -226,7 +226,7 @@ class POP3(asyncio.StreamReaderProtocol):
     async def pop3_APOP(self, *args):
         await self.push('-ERR APOP not implemented')
 
-    async def pop3_STAT(self):
+    async def pop3_STAT(self, *args):
         if self.session.status != 1:
             await self.push('-ERR Please auth')
             return
@@ -326,9 +326,6 @@ class POP3(asyncio.StreamReaderProtocol):
             await self.push('501 Syntax: QUIT')
         else:
             status = await self._call_handler_hook('QUIT')
-            if status is MISSING:
-                status = f'-ERR QUIT not implemented'
-                await self.push(status)
-            await self.push('+OK core mail')
+            await self.push('+OK core mail' if status is MISSING else status)
             self._handler_coroutine.cancel()
             self.transport.close()

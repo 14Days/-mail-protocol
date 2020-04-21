@@ -9,6 +9,9 @@ class IPOP3Model:
     def login(self, username, password):
         raise NotImplementedError()
 
+    def get_mail_number_and_size(self, username):
+        raise NotImplementedError()
+
 
 class POP3Model(IPOP3Model):
     _dao_user: IDaoUser
@@ -25,3 +28,10 @@ class POP3Model(IPOP3Model):
         user = self._dao_user.get_user_by_username(username.split('@')[0])
         if user.password != password:
             raise PasswordError('用户密码错误')
+
+    def get_mail_number_and_size(self, username) -> tuple:
+        user = self._dao_user.get_user_by_username(username.split('@')[0])
+        sum_size = 0
+        for item in user.to_list:
+            sum_size += item.mail.size
+        return len(user.to_list), sum_size

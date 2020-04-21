@@ -18,7 +18,7 @@ class User(Base):
     sex = Column(Integer, nullable=False, default=1)
     user_type = Column(Integer, nullable=False, default=2)
     from_list: list = relationship('UserMail', backref='from_user', foreign_keys='UserMail.from_user_id')
-    to_list = relationship('UserMail', backref='to_user', foreign_keys='UserMail.to_user_id')
+    to_list: list = relationship('UserMail', backref='to_user', foreign_keys='UserMail.to_user_id')
 
 
 class DirName(Base):
