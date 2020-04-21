@@ -38,6 +38,7 @@ class Mail(Base):
     delete_at = Column(DateTime, nullable=True)
     title = Column(String, nullable=False, default='无标题')
     file_name = Column(String, nullable=False)
+    size = Column(Integer, nullable=False)
     dir_name_id = Column(Integer, ForeignKey('dir_name.id'))
 
 

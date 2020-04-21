@@ -1,4 +1,3 @@
-import pathlib
 import re
 from src.basic.logger import get_logger
 from src.models.smtp import SMTPModel
@@ -10,8 +9,6 @@ EMPTYBYTES = b''
 
 
 class SaveMail:
-    path = pathlib.Path.joinpath(pathlib.Path(__file__).parent.parent.parent, 'mail')
-
     async def handle_RCPT(self, server, session, envelope, address, rcpt_options):
         if not address.endswith('@wghtstudio.cn'):
             return '550 not relaying to that domain'
@@ -30,6 +27,4 @@ class SaveMail:
 
         SMTPModel(envelope.mail_from, envelope.rcpt_tos, data).store_email()
 
-        # for item in envelope.rcpt_tos:
-        #     self._save(envelope.mail_from, item, data)
         return '250 OK'

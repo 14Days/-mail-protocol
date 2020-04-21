@@ -49,7 +49,8 @@ class SMTPModel(ISMTPModel):
         mail = Mail(
             title=title,
             file_name=self.mail_name,
-            dir_name_id=1
+            dir_name_id=1,
+            size=len(self.data)
         )
         for item in rcpt_user:
             logger.debug(item.id)

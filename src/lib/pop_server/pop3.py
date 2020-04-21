@@ -117,7 +117,7 @@ class POP3(asyncio.StreamReaderProtocol):
                     command = line.upper()
                     arg = None
                 else:
-                    command = line[:i].upper().decode(encoding='ascii')
+                    command = line[:i].upper()
                     arg = line[i + 1:].strip()
                 # 检查命令是否过长
                 if len(line) > self.command_size_limit:
@@ -201,10 +201,10 @@ class POP3(asyncio.StreamReaderProtocol):
         if self.session.status != 0:
             await self.push('-ERR Syntax: error command')
             return
-        self.session.username = username
         status = await self._call_handler_hook('USER', username)
         if status is MISSING:
             status = f'+OK ({self.hostname}): {username}'
+        self.session.username = username
         await self.push(status)
 
     async def pop3_PASS(self, password):
@@ -217,10 +217,10 @@ class POP3(asyncio.StreamReaderProtocol):
         if self.session.username is None:
             await self.push('-ERR Please send username first')
             return
-        status = await self._call_handler_hook('PASS', password)
+        status = await self._call_handler_hook('PASS', self.session.username, password)
         if status is MISSING:
-            self.session.status = 1
             status = f'+OK welcome {self.session.username}'
+        self.session.status = 1
         await self.push(status)
 
     async def pop3_APOP(self, *args):
@@ -243,7 +243,6 @@ class POP3(asyncio.StreamReaderProtocol):
         if status is MISSING:
             status = f'-ERR UIDL not implemented'
             await self.push(status)
-            raise NotImplementedError('UIDL')
         await self.push(status)
 
     async def pop3_LIST(self, which):
@@ -254,7 +253,6 @@ class POP3(asyncio.StreamReaderProtocol):
         if status is MISSING:
             status = f'-ERR LIST not implemented'
             await self.push(status)
-            raise NotImplementedError('LIST')
         await self.push(status)
 
     async def pop3_RETR(self, which):
@@ -273,7 +271,6 @@ class POP3(asyncio.StreamReaderProtocol):
         if status is MISSING:
             status = f'-ERR RETR not implemented'
             await self.push(status)
-            raise NotImplementedError('RETR')
         await self.push(status)
 
     async def pop3_DELE(self, which):
@@ -314,7 +311,6 @@ class POP3(asyncio.StreamReaderProtocol):
             if status is MISSING:
                 status = f'-ERR TOP not implemented'
                 await self.push(status)
-                raise NotImplementedError('TOP')
             await self.push(status)
         else:
             await self.push('-ERR Must send mail ID and line number')
@@ -323,6 +319,9 @@ class POP3(asyncio.StreamReaderProtocol):
         await self.push('+OK core mail')
 
     async def pop3_QUIT(self, arg):
+        if self.session.status != 1:
+            await self.push('-ERR Please auth')
+            return
         if arg:
             await self.push('501 Syntax: QUIT')
         else:
@@ -330,7 +329,6 @@ class POP3(asyncio.StreamReaderProtocol):
             if status is MISSING:
                 status = f'-ERR QUIT not implemented'
                 await self.push(status)
-                raise NotImplementedError('QUIT')
             await self.push('+OK core mail')
             self._handler_coroutine.cancel()
             self.transport.close()
