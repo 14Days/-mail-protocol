@@ -1,7 +1,7 @@
-import mailbox
 import pathlib
 import re
 from src.basic.logger import get_logger
+from src.models.smtp import SMTPModel
 
 logger = get_logger(__name__)
 
@@ -28,10 +28,8 @@ class SaveMail:
         lines = content.splitlines(keepends=True)
         data = EMPTYBYTES.join(lines)
 
-        for item in envelope.rcpt_tos:
-            self._save(envelope.mail_from, item, data)
-        return '250 OK'
+        SMTPModel(envelope.mail_from, envelope.rcpt_tos, data).store_email()
 
-    def _save(self, mail_from, rcpt_tos, data):
-        box = mailbox.Maildir(self.path, create=True)
-        box.add(data)
+        # for item in envelope.rcpt_tos:
+        #     self._save(envelope.mail_from, item, data)
+        return '250 OK'
