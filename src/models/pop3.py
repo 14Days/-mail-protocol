@@ -23,14 +23,13 @@ class POP3Model(IPOP3Model):
         user = self._dao_user.get_user_by_username(username.split('@')[0])
         if user is None:
             raise UserNotFound('用户未找到')
+        return user
 
-    def login(self, username, password):
-        user = self._dao_user.get_user_by_username(username.split('@')[0])
+    def login(self, user, password):
         if user.password != password:
             raise PasswordError('用户密码错误')
 
-    def get_mail_number_and_size(self, username) -> tuple:
-        user = self._dao_user.get_user_by_username(username.split('@')[0])
+    def get_mail_number_and_size(self, user) -> tuple:
         sum_size = 0
         for item in user.to_list:
             sum_size += item.mail.size
