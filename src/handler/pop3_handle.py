@@ -13,3 +13,6 @@ class SendMail:
     async def handle_STAT(self, server, session):
         count, size = POP3Model().get_mail_number_and_size(session.user)
         return f'+OK {count} {size}'
+
+    async def handle_UIDL(self, server, session, which):
+        return POP3Model().get_mail_uidl(session.user)
