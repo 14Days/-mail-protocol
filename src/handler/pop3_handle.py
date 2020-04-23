@@ -17,3 +17,6 @@ class SendMail:
 
     async def handle_UIDL(self, server, session, which):
         return POP3Model().get_mail_uidl(session.user, which)
+
+    async def handle_LIST(self, server, session, which):
+        return POP3Model().get_mail_list(session.user, which)

@@ -264,7 +264,7 @@ class POP3(asyncio.StreamReaderProtocol):
         if status is MISSING:
             status = f'-ERR LIST not implemented'
             await self.push(status)
-        await self.push(status)
+        await self.choose_push(status)
 
     async def pop3_RETR(self, which):
         if self.session.status != 1:

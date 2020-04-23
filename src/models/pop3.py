@@ -18,6 +18,9 @@ class IPOP3Model:
     def get_mail_uidl(self, user, which):
         raise NotImplementedError()
 
+    def get_mail_list(self, user, which):
+        raise NotImplementedError()
+
 
 class POP3Model(IPOP3Model):
     _dao_user: IDaoUser
@@ -51,3 +54,14 @@ class POP3Model(IPOP3Model):
         else:
             temp = int(which)
             return f'+OK {temp} {user.to_list[temp - 1].mail.file_name}'
+
+    def get_mail_list(self, user, which):
+        if which is None:
+            status_list = ['+OK core mail']
+            for index, item in enumerate(user.to_list):
+                logger.debug(index)
+                status_list.append(f'{index + 1} {item.mail.size}')
+            return status_list
+        else:
+            temp = int(which)
+            return f'+OK {temp} {user.to_list[temp - 1].mail.size}'
