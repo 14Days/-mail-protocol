@@ -4,7 +4,8 @@ from src.models.pop3 import POP3Model
 
 class SendMail:
     async def handle_USER(self, server, session, username):
-        session.user = POP3Model(dao_user=DaoUser()).confirm_user(username)
+        session.db = DaoUser()
+        session.user = POP3Model(dao_user=session.db).confirm_user(username)
         return f'+OK ({server.hostname}): {username}'
 
     async def handle_PASS(self, server, session, username, password):
