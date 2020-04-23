@@ -27,3 +27,6 @@ class SendMail:
 
     async def handle_TOP(self, server, session, which, top):
         return POP3Model().get_mail_body(session.user, which, top)
+
+    # async def handle_QUIT(self, server, session):
+    #     return POP3Model().del_mail(session)

@@ -26,6 +26,9 @@ class IPOP3Model:
     def get_mail_body(self, user, which, top):
         raise NotImplementedError()
 
+    def del_mail(self, session):
+        raise NotImplementedError()
+
 
 class POP3Model(IPOP3Model):
     _dao_user: IDaoUser
@@ -81,3 +84,10 @@ class POP3Model(IPOP3Model):
             return item
         else:
             return item[:top + 1]
+
+    # def del_mail(self, session):
+    #     db, user, del_list = session.db, session.user, session.del_list
+    #     user.to_list = [item for index, item in enumerate(user.to_list) if index + 1 not in del_list]
+    #     print(user.to_list)
+    #     db.commit()
+    #     return '+OK core mail'
