@@ -21,3 +21,9 @@ class SendMail:
 
     async def handle_LIST(self, server, session, which):
         return POP3Model().get_mail_list(session.user, which)
+
+    async def handle_RETR(self, server, session, which):
+        return POP3Model().get_mail_body(session.user, which)
+
+    async def handle_TOP(self, server, session, which, top):
+        return POP3Model().get_mail_body(session.user, which, top)

@@ -1,5 +1,7 @@
+import mailbox
+import pathlib
 from src.basic import get_logger
-from src.daos.user import IDaoUser, DaoUser
+from src.daos.user import IDaoUser
 from src.models.errors import UserNotFound, PasswordError
 
 logger = get_logger(__name__)
@@ -21,9 +23,13 @@ class IPOP3Model:
     def get_mail_list(self, user, which):
         raise NotImplementedError()
 
+    def get_mail_body(self, user, which, top):
+        raise NotImplementedError()
+
 
 class POP3Model(IPOP3Model):
     _dao_user: IDaoUser
+    _path = pathlib.Path.joinpath(pathlib.Path(__file__).parent.parent.parent, 'mail')
 
     def __init__(self, dao_user=None):
         self._dao_user = dao_user
@@ -65,3 +71,13 @@ class POP3Model(IPOP3Model):
         else:
             temp = int(which)
             return f'+OK {temp} {user.to_list[temp - 1].mail.size}'
+
+    def get_mail_body(self, user, which, top=None):
+        box = mailbox.Maildir(self._path, create=True)
+        item = box.get(user.to_list[which - 1].mail.file_name)
+        item = item.as_string().splitlines(keepends=False)
+        item.insert(0, '+OK core mail')
+        if top is None:
+            return item
+        else:
+            return item[:top + 1]

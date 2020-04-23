@@ -282,7 +282,7 @@ class POP3(asyncio.StreamReaderProtocol):
         if status is MISSING:
             status = f'-ERR RETR not implemented'
             await self.push(status)
-        await self.push(status)
+        await self.long_push(status)
 
     async def pop3_DELE(self, which):
         if self.session.status != 1:
@@ -322,7 +322,7 @@ class POP3(asyncio.StreamReaderProtocol):
             if status is MISSING:
                 status = f'-ERR TOP not implemented'
                 await self.push(status)
-            await self.push(status)
+            await self.long_push(status)
         else:
             await self.push('-ERR Must send mail ID and line number')
 
