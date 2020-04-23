@@ -15,15 +15,15 @@ class IPOP3Model:
     def get_mail_number_and_size(self, username):
         raise NotImplementedError()
 
-    def get_mail_uidl(self, user) -> str:
+    def get_mail_uidl(self, user, which):
         raise NotImplementedError()
 
 
 class POP3Model(IPOP3Model):
     _dao_user: IDaoUser
 
-    def __init__(self):
-        self._dao_user = DaoUser()
+    def __init__(self, dao_user=None):
+        self._dao_user = dao_user
 
     def confirm_user(self, username: str):
         user = self._dao_user.get_user_by_username(username.split('@')[0])
@@ -41,11 +41,13 @@ class POP3Model(IPOP3Model):
             sum_size += item.mail.size
         return len(user.to_list), sum_size
 
-    def get_mail_uidl(self, user) -> list:
-        status_list = ['+OK core mail']
-
-        for index, item in enumerate(user.to_list):
-            logger.debug(index)
-            status_list.append(f'{index} {item.mail.file_name}')
-
-        return status_list
+    def get_mail_uidl(self, user, which):
+        if which is None:
+            status_list = ['+OK core mail']
+            for index, item in enumerate(user.to_list):
+                logger.debug(index)
+                status_list.append(f'{index + 1} {item.mail.file_name}')
+            return status_list
+        else:
+            temp = int(which)
+            return f'+OK {temp} {user.to_list[temp - 1].mail.file_name}'

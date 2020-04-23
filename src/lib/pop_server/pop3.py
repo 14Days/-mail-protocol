@@ -162,6 +162,12 @@ class POP3(asyncio.StreamReaderProtocol):
             await self.push(item)
         await self.push('.')
 
+    async def choose_push(self, status):
+        if isinstance(status, list):
+            await self.long_push(status)
+        else:
+            await self.push(status)
+
     async def handle_exception(self, error):
         if hasattr(self.event_handler, 'handle_exception'):
             status = await self.event_handler.handle_exception(error)
@@ -248,7 +254,7 @@ class POP3(asyncio.StreamReaderProtocol):
         if status is MISSING:
             status = f'-ERR UIDL not implemented'
             await self.push(status)
-        await self.long_push(status)
+        await self.choose_push(status)
 
     async def pop3_LIST(self, which):
         if self.session.status != 1:

@@ -1,9 +1,10 @@
+from src.daos.user import DaoUser
 from src.models.pop3 import POP3Model
 
 
 class SendMail:
     async def handle_USER(self, server, session, username):
-        session.user = POP3Model().confirm_user(username)
+        session.user = POP3Model(dao_user=DaoUser()).confirm_user(username)
         return f'+OK ({server.hostname}): {username}'
 
     async def handle_PASS(self, server, session, username, password):
@@ -15,4 +16,4 @@ class SendMail:
         return f'+OK {count} {size}'
 
     async def handle_UIDL(self, server, session, which):
-        return POP3Model().get_mail_uidl(session.user)
+        return POP3Model().get_mail_uidl(session.user, which)
