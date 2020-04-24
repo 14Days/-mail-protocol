@@ -85,9 +85,10 @@ class POP3Model(IPOP3Model):
         else:
             return item[:top + 1]
 
-    # def del_mail(self, session):
-    #     db, user, del_list = session.db, session.user, session.del_list
-    #     user.to_list = [item for index, item in enumerate(user.to_list) if index + 1 not in del_list]
-    #     print(user.to_list)
-    #     db.commit()
-    #     return '+OK core mail'
+    def del_mail(self, session):
+        db, user, del_list = session.db, session.user, session.del_list
+        temp = [item for index, item in enumerate(user.to_list) if index + 1 in del_list]
+        for item in temp:
+            db.session.delete(item)
+        db.commit()
+        return '+OK core mail'

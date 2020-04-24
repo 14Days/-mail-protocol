@@ -17,7 +17,7 @@ class User(Base):
     nickname = Column(String, default='新建用户')
     sex = Column(Integer, nullable=False, default=1)
     user_type = Column(Integer, nullable=False, default=2)
-    from_list: list = relationship('UserMail', backref='from_user', foreign_keys='UserMail.from_user_id')
+    from_list: list = relationship('Mail', backref='user')
     to_list: list = relationship('UserMail', backref='to_user', foreign_keys='UserMail.to_user_id')
 
 
@@ -40,11 +40,13 @@ class Mail(Base):
     file_name = Column(String, nullable=False)
     size = Column(Integer, nullable=False)
     dir_name_id = Column(Integer, ForeignKey('dir_name.id'))
+    user_id = Column(Integer, ForeignKey('user.id'))
+    is_from_del = Column(Integer, nullable=False, default=0)
 
 
 class UserMail(Base):
     __tablename__ = 'user_mail'
-    from_user_id = Column(Integer, ForeignKey('user.id'), name='from', primary_key=True)
     to_user_id = Column(Integer, ForeignKey('user.id'), name='to', nullable=False, primary_key=True)
     mail_id = Column(Integer, ForeignKey('mail.id'), nullable=False, primary_key=True)
+    is_to_del = Column(Integer, nullable=False, default=0)
     mail = relationship('Mail', foreign_keys=[mail_id])

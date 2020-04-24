@@ -52,8 +52,11 @@ class SMTPModel(ISMTPModel):
             dir_name_id=1,
             size=len(self.data)
         )
+        # 添加到发送方
+        from_user.from_list.append(mail)
+        # 添加到接收方
         for item in rcpt_user:
             logger.debug(item.id)
-            user_mail = UserMail(from_user_id=from_user.id, to_user_id=item.id, mail=mail)
-            from_user.from_list.append(user_mail)
+            user_mail = UserMail(mail=mail)
+            item.to_list.append(user_mail)
         self._dao_user.commit()
