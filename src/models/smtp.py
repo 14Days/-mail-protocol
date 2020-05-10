@@ -49,6 +49,7 @@ class SMTPModel(ISMTPModel):
         mail = Mail(
             title=title,
             file_name=self.mail_name,
+            content=self.data,
             dir_name_id=1,
             size=len(self.data)
         )
