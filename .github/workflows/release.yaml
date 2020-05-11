@@ -27,4 +27,4 @@ jobs:
             git pull origin master
             if [ $(docker ps -aq --filter name=mail_protocol) ]; then docker rm -f mail_protocol; docker rmi mail_protocol; fi
             docker build -t 'mail_protocol' .
-            docker run -d -p 8025:8025 -p 8026:8026 --mount type=bind,source=/home/zjg/-mail-protocol/mail,target=/app/mail --mount type=bind,source=/home/zjg/-mail-protocol/log,target=/app/log --name=mail_protocol mail_protocol
+            docker run -d -p 8025:8025 -p 8026:8026 --mount type=bind,source=/home/zjg/-mail-protocol/mail,target=/app/mail --mount type=bind,source=/home/zjg/-mail-protocol/log,target=/app/log --name=mail_protocol --network my-net mail_protocol
